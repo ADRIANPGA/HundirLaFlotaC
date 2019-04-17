@@ -15,11 +15,14 @@
 // Prototipos de todas las funciones
 void desplegarCabecera();
 int menu();
+//Parametros por definir
 void jugarSolo();
 void jugarEntreMaquinas();
 
 // Main con las llamadas a las funciones necesarias para el juego
 int main(int argc, char const *argv[]){
+	//Hueco para gestionar los argumentos del main y almacenarlos en variables para lanzar a los modos de juego
+
 	int opcion;
 	desplegarCabecera();
 	//Recojo la opcion del menu y ejecuto el modo de juego escogido;
