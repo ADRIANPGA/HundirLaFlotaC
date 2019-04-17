@@ -3,7 +3,7 @@
 **/
 
 /**
-* Commit Actual:
+* Objetivo Actual:
 * Montando la estructura del Main y los menus antes de empezar a trabajar con los punteros
 **/
 
@@ -11,18 +11,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
+
+//Definición de la estructura del jugador
+struct Jugador{
+	char nombre[30];
+	int *tableroPropio, *tableroRival;
+};
 
 // Prototipos de todas las funciones
 void desplegarCabecera();
 int menu();
-//Parametros por definir
-void jugarSolo();
-void jugarEntreMaquinas();
+void jugarSolo(int filas, int columnas);
+void jugarEntreMaquinas(int filas, int columnas);
+void inicializarTablero(int *tablero, int filas, int columnas);
 
 // Main con las llamadas a las funciones necesarias para el juego
 int main(int argc, char const *argv[]){
-	//Hueco para gestionar los argumentos del main y almacenarlos en variables para lanzar a los modos de juego
-
+	if (argc != 3){
+		printf("Error: Parametros incorrectos.\n");
+		printf("Se debe enviar solamente las filas y columnas que tendra el tablero en ese orden.\n");
+		return -1;
+	}
+	int filas = atoi(argv[1]), columnas = atoi(argv[2]);
+	else{
+		if ( (filas < 6) || (columnas < 6) ){
+			printf("Error: Parametros incorrectos.\n");
+			printf("El numero de filas y columnas debe ser mayor que cinco para poder jugar.\n");
+			return -1;
+		}
+	}
+	srand(time(NULL));
 	int opcion;
 	desplegarCabecera();
 	//Recojo la opcion del menu y ejecuto el modo de juego escogido;
@@ -30,10 +49,10 @@ int main(int argc, char const *argv[]){
 		opcion = menu();
 		switch(opcion){
 			case 1:
-			jugarSolo();
+			jugarSolo(filas, columnas);
 			break;
 			case 2:
-			jugarEntreMaquinas();
+			jugarEntreMaquinas(filas, columnas);
 			break;
 			default:
 			printf("Error: Unexpected\n");
@@ -74,4 +93,31 @@ int menu(){
 		}
 	}while( (opcion!=1) && (opcion!=2) && (opcion!=3));
 	return opcion;
+}
+
+void jugarSolo(int filas, int columnas){
+	struct Jugador jugador, bot1;
+	//Inicializo los nombres y reservo la memoria para tableros de cada una de las estructuras
+	printf("Introduzca su nombre (Máx 30 caracteres): ");
+	jugador.nombre = fgets(nombre, 30, stdin);
+	bot1.nombre = "Bot";
+	printf("Dara comienzo la batalla entre %s y %s.\n", jugador.nombre, bot1.nombre);
+	jugador.tableroPropio = (int*)malloc(sizeof(int)*filas*columnas);
+	jugador.tableroRival = (int*)malloc(sizeof(int)*filas*columnas);
+	bot1.tableroPropio = (int*)malloc(sizeof(int)*filas*columnas);
+	bot1.tableroRival = (int*)malloc(sizeof(int)*filas*columnas);
+	//Inicializo a cero todas las posiciones de los tableros
+	inicializarTablero(jugador.tableroPropio);
+	inicializarTablero(jugador.tableroRival);
+	inicializarTablero(bot1.tableroPropio);
+	inicializarTablero(bot1.tableroRival);
+
+}
+
+void inicializarTablero(int *tablero, int filas, int columnas){
+	int i=0;
+	//Igualo a 0 todas las posiciones del puntero con un bucle for
+	for (i = 0; i < (filas*columnas); i++){
+		*(tablero+i) = 0;
+	}
 }
