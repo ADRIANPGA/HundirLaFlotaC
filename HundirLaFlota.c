@@ -2,32 +2,46 @@
 * Autor: Adrián Pérez García
 **/
 
+/**
+* Commit Actual:
+* Montando la estructura del Main y los menus antes de empezar a trabajar con los punteros
+**/
+
+// Inclusión de todas las constantes
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
+// Prototipos de todas las funciones
 void desplegarCabecera();
 int menu();
+void jugarSolo();
+void jugarEntreMaquinas();
 
+// Main con las llamadas a las funciones necesarias para el juego
 int main(int argc, char const *argv[]){
 	int opcion;
 	desplegarCabecera();
 	//Recojo la opcion del menu y ejecuto el modo de juego escogido;
-	opcion = menu();
-	switch(opcion){
-		case 1:
-
-		break;
-		case 2:
-
-		break;
-		default:
-		printf("Error: Unexpected\n");
-		return (-1);
-	}
+	do
+		opcion = menu();
+		switch(opcion){
+			case 1:
+			jugarSolo();
+			break;
+			case 2:
+			jugarEntreMaquinas();
+			break;
+			default:
+			printf("Error: Unexpected\n");
+			opcion = -1;
+		}
+	while(opcion != -1);
 	return 0;
 }
 
-void desplegarCabecera{
+// Funciones en el mismo orden que estaban definidas
+void desplegarCabecera(){
 	printf("---------------------\n");
 	printf("|  Hundir la Flota  |\n");
 	printf("---------------------\n");
