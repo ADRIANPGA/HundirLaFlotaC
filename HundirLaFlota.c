@@ -158,10 +158,10 @@ void inicializarTablero(int *tablero, int filas, int columnas){
 
 void colocarBarcosManual(int *tablero, int filas, int columnas){
 	int barcos1=4, barcos2=2, barcos3=1;
+	//Menu para colocar los barcos que varía según se van acabando los tipos de barcos
 	printf("El estado actual del tablero es:\n");
 	imprimirMatriz(*tablero, filas, columnas);
 	printf("\n¿Que barco deseas colocar?\n");
-	//Menu para colocar los barcos que varía según se van acabando los tipos de barcos
 	while( (barcos1>0) && (barcos2>0) && (barcos3>0) ){
 		contador = 1;
 		while(barcos1>0){
@@ -173,8 +173,14 @@ void colocarBarcosManual(int *tablero, int filas, int columnas){
 			contador++;
 		}
 		while(barcos3>0){
-			printf("[%d] - Barco de 3\n (Barcos restantes: %d)\n", contador, barcos3);
+			printf("[%d] - Barco de 3 (Barcos restantes: %d)\n", contador, barcos3);
 			contador++;
+		}
+		printf("Nota: Los barcos de 2 o más espacios siempre se colocaran arriba y a la derecha según la orientación.\n");
+		scanf("%d",&seleccionador);
+		switch(seleccionador){
+			case 1:
+			int avanze = colocarBarcos1()
 		}
 	}
 }
@@ -185,10 +191,26 @@ void colocarBarcosAuto(int *tablero, int filas, int columnas){
 }
 
 void imprimirMatriz(int *matrizp, int filasp, int columnasp){
-	for (int j = 0; j < filasp ; j++){
-		for (int i = 0; i < columnasp; i++){
+	int i,j,k, contador = 1;
+	for (k = 0; k < count; k++){
+		printf("%d\t", contador);
+		contador++;
+	}
+	printf("\n");
+	contador = 1;
+	for (j = 0; j < filasp ; j++){
+		printf("%d\t", contador);
+		for (i = 0; i < columnasp; i++){
 			printf("%d\t",*(matrizp+i*filasp+j));
 		}
 		printf("\n");
+		contador++;
 	}
+}
+
+void colocarBarcos1(){
+	do{
+					printf("Indique la posicion en la que quieras colocar el barco en el eje vertical:\n");
+					scanf
+				}
 }
