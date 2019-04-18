@@ -25,6 +25,9 @@ int menu();
 void jugarSolo(int filas, int columnas);
 void jugarEntreMaquinas(int filas, int columnas);
 void inicializarTablero(int *tablero, int filas, int columnas);
+void colocarBarcosManual(int *tablero, int filas, int columnas);
+void colocarBarcosAuto(int *tablero, int filas, int columnas);
+void imprimirMatriz(int *matrizp, int filasp, int columnasp);
 
 // Main con las llamadas a las funciones necesarias para el juego
 int main(int argc, char const *argv[]){
@@ -81,7 +84,7 @@ int menu(){
 		scanf("%d", &opcion);
 		switch(opcion){
 			case 1: case 2:
-				break;
+			break;
 			case 3:
 				return 0;
 			break;
@@ -97,6 +100,7 @@ int menu(){
 
 void jugarSolo(int filas, int columnas){
 	struct Jugador jugador, bot1;
+	int colocacion, final;
 	//Inicializo los nombres y reservo la memoria para tableros de cada una de las estructuras
 	printf("Introduzca su nombre (Máx 30 caracteres): ");
 	jugador.nombre = fgets(nombre, 30, stdin);
@@ -111,7 +115,37 @@ void jugarSolo(int filas, int columnas){
 	inicializarTablero(jugador.tableroRival);
 	inicializarTablero(bot1.tableroPropio);
 	inicializarTablero(bot1.tableroRival);
+	do{
+		printf("¿Como desea colocar los barcos %s?\n", jugador.nombre);
+		printf("[1] - De forma manual\n");
+		printf("[2] - Aleatoriamente\n");
+		printf("Nota: Los barcos de %s siempre seran colocados de forma aleatoria.\n", bot1.nombre);
+		scanf("%d", &colocacion);
+		switch(colocacion){
+			case 1:
+				colocarBarcosManual(jugador.tableroPropio, filas, columnas);, int filas, int columnas
+			break;
+			case 2:
+				colocarBarcosAuto(jugador.tableroPropio, filas, columnas);, int filas, int columnas
+			break;
+			default:
+				printf("Error: Opción incorrecta\n");
+				printf("Introduce un valor del 1 a 2\n");
+				printf("Relanzado menu\n");
+			break;
+		}
+	}while( (colocacion!=1) && (colocacion!=2) );
+	colocarBarcosAuto(bot1.tableroPropio);
+	//Convierto los tableros generados a tableros rivales para el otro
+	bot1.tableroPropio = jugador.tableroRival;
+	jugador.tableroRival = bot1.tableroPropio;
+	printf("Tableros generados, da comiezo el juego.\n");
 
+	//Libero todos los punteros tras el juego por si se repite la partida
+	free(jugador.tableroPropio);
+	free(jugador.tableroRival);
+	free(bot1.tableroPropio);
+	free(bot1.tableroRival);
 }
 
 void inicializarTablero(int *tablero, int filas, int columnas){
@@ -119,5 +153,42 @@ void inicializarTablero(int *tablero, int filas, int columnas){
 	//Igualo a 0 todas las posiciones del puntero con un bucle for
 	for (i = 0; i < (filas*columnas); i++){
 		*(tablero+i) = 0;
+	}
+}
+
+void colocarBarcosManual(int *tablero, int filas, int columnas){
+	int barcos1=4, barcos2=2, barcos3=1;
+	printf("El estado actual del tablero es:\n");
+	imprimirMatriz(*tablero, filas, columnas);
+	printf("\n¿Que barco deseas colocar?\n");
+	//Menu para colocar los barcos que varía según se van acabando los tipos de barcos
+	while( (barcos1>0) && (barcos2>0) && (barcos3>0) ){
+		contador = 1;
+		while(barcos1>0){
+			printf("[%d] - Barco de 1 (Barcos restantes: %d)\n", contador, barcos1);
+			contador++;
+		}
+		while(barcos2>0){
+			printf("[%d] - Barco de 2 (Barcos restantes: %d)\n", contador, barcos2);
+			contador++;
+		}
+		while(barcos3>0){
+			printf("[%d] - Barco de 3\n (Barcos restantes: %d)\n", contador, barcos3);
+			contador++;
+		}
+	}
+}
+
+void colocarBarcosAuto(int *tablero, int filas, int columnas){
+	*(tablero+(rand()*(filas*columnas))) = 1;
+	//Genero un numero aleatorio entre los valores del tablero para colocar el barco de 1
+}
+
+void imprimirMatriz(int *matrizp, int filasp, int columnasp){
+	for (int j = 0; j < filasp ; j++){
+		for (int i = 0; i < columnasp; i++){
+			printf("%d\t",*(matrizp+i*filasp+j));
+		}
+		printf("\n");
 	}
 }
