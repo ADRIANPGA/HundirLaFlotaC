@@ -157,10 +157,10 @@ void inicializarTablero(int *tablero, int filas, int columnas){
 }
 
 void colocarBarcosManual(int *tablero, int filas, int columnas){
-	int barcos1=4, barcos2=2, barcos3=1;
+	int barcos1=4, barcos2=2, barcos3=1, int avance;
 	//Menu para colocar los barcos que varía según se van acabando los tipos de barcos
 	printf("El estado actual del tablero es:\n");
-	imprimirMatriz(*tablero, filas, columnas);
+	imprimirMatriz(*jugador.tableroPropio, filas, columnas);
 	printf("\n¿Que barco deseas colocar?\n");
 	while( (barcos1>0) && (barcos2>0) && (barcos3>0) ){
 		contador = 1;
@@ -180,7 +180,9 @@ void colocarBarcosManual(int *tablero, int filas, int columnas){
 		scanf("%d",&seleccionador);
 		switch(seleccionador){
 			case 1:
-			int avanze = colocarBarcos1()
+				if (barcos1>0){
+					colocarBarcos1(*jugador.tableroPropio, filas, columnas);
+				}
 		}
 	}
 }
@@ -193,11 +195,9 @@ void colocarBarcosAuto(int *tablero, int filas, int columnas){
 void imprimirMatriz(int *matrizp, int filasp, int columnasp){
 	int i,j,k, contador = 1;
 	for (k = 0; k < count; k++){
-		printf("%d\t", contador);
-		contador++;
+		printf("%d\t", k);
 	}
 	printf("\n");
-	contador = 1;
 	for (j = 0; j < filasp ; j++){
 		printf("%d\t", contador);
 		for (i = 0; i < columnasp; i++){
@@ -208,9 +208,67 @@ void imprimirMatriz(int *matrizp, int filasp, int columnasp){
 	}
 }
 
-void colocarBarcos1(){
+void colocarBarcos1(int *tablero, int filas, int columnas){
+	int colocarX, colocarY, avance = 1, avanceMax = 1, opcion;
 	do{
-					printf("Indique la posicion en la que quieras colocar el barco en el eje vertical:\n");
-					scanf
+		do{
+			printf("Indique la posicion en la que quieras colocar el barco en el eje horizontal:\n");
+			scanf("%d", &colocarX);
+			if ( (colocarX>0) || (colocarX<=columnas)){
+				avance = 1;
+			}
+			else{
+				printf("Error: posición no valida.\n");
+				printf("La posición no puede ser menor que 0 o mayor que el numero de columnas establecidas.\n");
+				printf("Relanzando menu.\n");
+				avance = 0;
+			}
+		}while(avance!=1);
+		avance = 0;
+		do{	
+			printf("Indique la posicion en la que quieras colocar el barco en el eje vertical:\n");
+			scanf("%d", &colocarY);
+			if ( ((colocarY>0) || (colocarY<=filas)) && (*(tablero+Posicion) == 0)){
+				*(tablero+(posicionquesea)) = 1;
+				avance = 1;
+			}
+			else{
+				printf("Error: posición no valida.\n");
+				if( (*(tablero+Posicionquesea) != 0) ){
+					printf("Esa posición ya esta ocupada.\n");
+					do{
+						printf("¿Que acción desea realizar?\n");
+						printf("[1] - Cambiar posicion dentro de la misma columna\n");
+						printf("[2] - Cambiar posicion horizontal\n");
+						scanf("%d", &opcion);
+						switch(opcion){
+							case 1:
+							avance = 0;
+							break;
+							case 2:
+							avanceMax = 0;
+							break;
+							default:
+								printf("Error: Opción no valida.\n");
+								printf("Relanzando menu.\n");
+							break;
+						}
+					}while( (opcion!=1) && (opcion!=2) );
 				}
+				else{
+					printf("La posición no puede ser menor que 0 o mayor que el numero de filas establecidas.\n");
+					printf("Relanzando menu.\n");
+					avance = 0;
+				}
+			}
+		}while(avance!=1);
+	}while(avanceMax!=1);
+	printf("Barco de 1 establecido en la posicion (%d,%d).\n", colocarX, colocarY);
+}
+
+void colocarBarcos2(int *tablero, int filas, int columnas){
+	printf("¿Como desea colocar los barcos?\n");
+	printf("[1] - Horizontalmente\n");
+	printf("[2] - Verticalmente\n");
+	
 }
