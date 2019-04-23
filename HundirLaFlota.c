@@ -4,7 +4,7 @@
 
 /**
 * Objetivo Actual:
-* Colocando barcos manualmente
+* Imprimir en Archivo
 **/
 
 // Inclusión de todas las constantes
@@ -134,7 +134,6 @@ void imprimirMatriz(int *matrizp, int filasp, int columnasp){
 		printf("%d\t", k);
 	}
 	printf("\n\n");
-
 	for (i = 0; i < filasp ; i++){
 		printf("%d\t", contador);
 		for (j = 0; j < columnasp; j++){
@@ -157,7 +156,6 @@ void jugarSolo(int filas, int columnas){
 	struct Jugador jugador, bot1;
 	int colocacion;
 	char *nombreJug=(char*)malloc(sizeof(char)*20);
-	char caracter;
 	printf("Introduzca su nombre [Max 20 caracteres]: ");
 	scanf(" %s", nombreJug);
 	//Inicializo los nombres y reservo la memoria para tableros de cada una de las estructuras
@@ -193,7 +191,6 @@ void jugarSolo(int filas, int columnas){
 	//Se generar los barcos del bot de forma automática
 	colocarBarcosAuto(bot1.tableroPropio, filas, columnas);
 	printf("Barcos de Bot1 generados automaticamente\n\n");
-	imprimirMatriz(bot1.tableroPropio,filas,columnas);
 	//Comienzo del juego en si
 	desplegarCabecera();
 	printf("Tableros generados, da comiezo el juego entre %s y Bot1.\n", nombreJug);
@@ -221,7 +218,7 @@ void jugarSolo(int filas, int columnas){
 					printf("Indique la posicion de disparo en el eje horizontal:\n");
 					scanf("%d", &j);
 					j--;
-					if ( (j<0) || (j>=filas) ){
+					if ( (j<0) || (j>=columnas) ){
 						printf("Error: posición no valida.\n");
 						printf("La posición no puede ser menor que 0 o mayor que el numero de columnas establecidas.\n");
 						printf("Relanzando menu.\n");
@@ -232,9 +229,9 @@ void jugarSolo(int filas, int columnas){
 					printf("Indique la posicion de disparo en el eje vertical:\n");
 					scanf("%d", &i);
 					i--;
-					if ( ((i<0) || (i>=columnas)) || (*(bot1.tableroPropio+(i*columnas)+j) != 0)){
+					if ( (i<0) || (i>=filas) || ( *(bot1.tableroPropio+(i*columnas)+j) == 8 || *(bot1.tableroPropio+(i*columnas)+j) < 0)){
 						printf("Error: posición no valida.\n");
-						if( *(bot1.tableroPropio+(i*columnas)+j) == 8 || *(bot1.tableroPropio+(i*columnas)+j) < 8){
+						if( *(bot1.tableroPropio+(i*columnas)+j) == 8 || *(bot1.tableroPropio+(i*columnas)+j) < 0){
 							printf("Esa posición ya fue disparada.\n");
 							do{
 								printf("¿Que acción desea realizar?\n");
@@ -297,8 +294,10 @@ void jugarSolo(int filas, int columnas){
 			valido = 0;
 			do{
 				ii = 1+rand()%(filas+1);
-				jj = 1+rand()%(columnas*1);
-				printf("Generada aleatoriamente la posición (%d,%d)\n",(ii+1),(jj+1));
+				jj = 1+rand()%(columnas+1);
+				printf("Generada aleatoriamente la posición (%d,%d)\n",(ii),(jj));
+				ii--;
+				jj--;
 				if (*(jugador.tableroPropio+(ii*columnas)+jj)>=0 && *(jugador.tableroPropio+(ii*columnas)+jj)!=8){
 					valido = 1;
 				}
@@ -336,15 +335,12 @@ void jugarSolo(int filas, int columnas){
 		contador++;
 	}
 	printf("\n\nFINAL (%d turnos)\n", contador);
-	if( (contador%2) == 0 ){
+	if( (contador%2) != 0 ){
 		printf("El ganador del partido es %s.\n\n", nombreJug);
 	}
 	else{
 		printf("El ganado del partido es Bot1.\n\n");
 	}
-	//Libero todos los punteros tras el juego por si se repite la partida
-	free(jugador.tableroPropio);
-	free(bot1.tableroPropio);
 }
 
 void colocarBarcosManual(int *tablero, int filas, int columnas){
@@ -742,14 +738,15 @@ void colocarBarcos3(int *tablero, int filas, int columnas){
 		*(tablero+(i3*columnas)+j2) = 3;
 	}
 	printf("Barco de dos posiciones colocado en (%d,%d) , (%d,%d) y (%d,%d).\n", (i+1), (j+1), (i2+1), (j2+1), (i3+1), (j3+1));
-	printf("Sin configurar.\n");
 }
 
 void colocarBarcosAuto(int *tablero, int filas, int columnas){
-	printf("Colocar barcos automaticamente no configurado.\n");
 	int tamanio = filas*columnas;
 	//Coloco todos los barcos de 1
-	int random, random2, barcos1 = 4, barcos2 = 2, barcos3 = 1;
+	int random, random2, barcos1, barcos2, barcos3;
+	barcos1 = 4;
+	barcos2 = 2;
+	barcos3 = 1;
 	while(barcos1>0){
 		random = (rand()%tamanio);
 		if (*(tablero+random) == 0){
@@ -763,7 +760,7 @@ void colocarBarcosAuto(int *tablero, int filas, int columnas){
 		if(random2 == 0){
 			//Posición horizontal
 			random = (rand()%tamanio);
-			if ((random+1)%(columnas-1) == 0){
+			if ((random+1-(columnas-1))%(columnas) == 0 || ((random-(columnas-1))%(columnas)) == 0){
 				if (*(tablero+random)==0 && *(tablero+random-1)==0){
 					*(tablero+random) = 2;
 					*(tablero+random-1) = 2;
@@ -780,18 +777,180 @@ void colocarBarcosAuto(int *tablero, int filas, int columnas){
 		}
 		else{
 			//Posición vertical
-			random = columnas+(rand()%(tamanio+columnas));
-			if (*(tablero+random)==0 && *(tablero+random-(columnas-1))==0){
+			random = columnas+(rand()%(tamanio-columnas));
+			if (*(tablero+random)==0 && *(tablero+random-(columnas))==0){
 					*(tablero+random) = 2;
-					*(tablero+random+1) = 2;
+					*(tablero+random-columnas) = 2;
 					barcos2--;
+				}
+		}
+	}
+	//Coloco todos los barcos de 3
+	while(barcos3>0){
+		random2 = (rand()%2);
+		if(random2 == 0){
+			//Posición horizontal
+			random = (rand()%tamanio);
+			if (((random+1)-(columnas-1))%(columnas) == 0 || ((random+2)-(columnas-1))%(columnas) == 0 || ((random)-(columnas-1))%(columnas) == 0){
+				if (*(tablero+random)==0 && *(tablero+random-1)==0 && *(tablero+random-2)==0){
+					*(tablero+random) = 3;
+					*(tablero+random-1) = 3;
+					*(tablero+random-2) = 3;
+					barcos3--;
+				}
+			}
+			else{
+				if (*(tablero+random)==0 && *(tablero+random+1)==0 && *(tablero+random+2)==0){
+					*(tablero+random) = 3;
+					*(tablero+random+1) = 3;
+					*(tablero+random+2) = 3;
+					barcos3--;
+				}
+			}
+		}
+		else{
+			//Posición vertical
+			random = 2*columnas+(rand()%(tamanio-(2*columnas)));
+			if (*(tablero+random)==0 && *(tablero+random-columnas)==0 && *(tablero+random-(2*columnas))==0){
+					*(tablero+random) = 3;
+					*(tablero+random-columnas) = 3;
+					*(tablero+random-2*(columnas)) = 3;
+					barcos3--;
 				}
 		}
 	}
 }
 
 void jugarEntreMaquinas(int filas, int columnas){
-	printf("Error: Sin configurar\n");
+	struct Jugador bot1, bot2;
+	bot2.tableroPropio = (int*)malloc(sizeof(int)*filas*columnas);
+	bot1.tableroPropio = (int*)malloc(sizeof(int)*filas*columnas);
+	//Inicializo a cero todas las posiciones de los tableros
+	inicializarTablero(bot1.tableroPropio, filas, columnas);
+	inicializarTablero(bot2.tableroPropio, filas, columnas);
+	//Se generar los barcos del bot de forma automática
+	colocarBarcosAuto(bot1.tableroPropio, filas, columnas);
+	colocarBarcosAuto(bot2.tableroPropio, filas, columnas);
+	printf("Barcos de ambos bots generados automaticamente\n\n");
+	//Comienzo del juego en si
+	desplegarCabecera();
+	printf("Tableros generados, da comiezo el juego entre Bot1 y Bot2.\n");
+	printf("Leyenda:\n");
+	printf("Las casillas de valor 0 simbolizaran agua.\n");
+	printf("Las casillas de valor 8 simbolizaran agua ya disparada.\n");
+	printf("Las casillas de valor 1 o -1 simbolizaran barcos de 1 posicion intactos o disparados respectivamente.\n");
+	printf("Las casillas de valor 2 o -2 simbolizaran barcos de 2 posiciones intactos o disparados respectivamente.\n");
+	printf("Las casillas de valor 3 o -3 simbolizaran barcos de 3 posiciones intactos o disparados respectivamente.\n");
+	printf("Las casillas de valor ? simbolizaran posiciones del tablero con valor desconocido.\n");
+	//Da comienzo el bucle que decide la partida
+	int valido = 0, ii, jj, posDir = 0, contador = 0, avanceMax = 1, avance = 1, i, j, opcion;
+	while((partidaFinalizada(bot2.tableroPropio, filas, columnas) != 1) && (partidaFinalizada(bot1.tableroPropio, filas, columnas) != 1)){
+		if((contador%2) == 0){
+			printf("Turno para Bot1.\n");
+			valido = 0;
+			do{
+				ii = 1+rand()%(filas+1);
+				jj = 1+rand()%(columnas+1);
+				printf("Generada aleatoriamente la posición (%d,%d)\n",(ii),(jj));
+				ii--;
+				jj--;
+				if (*(bot2.tableroPropio+(ii*columnas)+jj)>=0 && *(bot2.tableroPropio+(ii*columnas)+jj)!=8){
+					valido = 1;
+					printf("Disparando\n");
+				}
+				else{
+					valido = 0;
+					printf("No valido, generando otra.\n");
+				}
+			} while (valido!=1);
+			posDir = *(bot2.tableroPropio+(ii*columnas)+jj);
+			switch(posDir){
+				case 0:
+					printf("AGUA\n");
+					*(bot2.tableroPropio+(ii*columnas)+jj) = 8;
+				break;
+				case 1:
+					printf("TOCADO\n");
+					printf("Barco de 1\n");
+					*(bot2.tableroPropio+(ii*columnas)+jj) = -1;
+				break;
+				case 2:
+					printf("TOCADO\n");
+					printf("Barco de 2\n");
+					*(bot2.tableroPropio+(ii*columnas)+jj) = -2;
+				break;
+				case 3:
+					printf("TOCADO\n");
+					printf("Barco de 3\n");
+					*(bot2.tableroPropio+(ii*columnas)+jj) = -3;
+				break;
+				default:
+					printf("Error: Unexpected\n");
+				break;
+			}
+			printf("\n");
+			contador++;
+		}
+		else{
+			printf("Turno para Bot2.\n");
+				valido = 0;
+				do{
+					ii = 1+rand()%(filas+1);
+					jj = 1+rand()%(columnas+1);
+					printf("Generada aleatoriamente la posición (%d,%d)\n",(ii),(jj));
+					ii--;
+					jj--;
+					if (*(bot1.tableroPropio+(ii*columnas)+jj)>=0 && *(bot1.tableroPropio+(ii*columnas)+jj)!=8){
+						valido = 1;
+						printf("Disparando\n");
+					}
+					else{
+						valido = 0;
+						printf("No valido, generando otra.\n");
+					}
+				} while (valido!=1);
+			posDir = *(bot1.tableroPropio+(ii*columnas)+jj);
+			switch(posDir){
+				case 0:
+					printf("AGUA\n");
+					*(bot1.tableroPropio+(ii*columnas)+jj) = 8;
+				break;
+				case 1:
+					printf("TOCADO\n");
+					printf("Barco de 1\n");
+					*(bot1.tableroPropio+(ii*columnas)+jj) = -1;
+				break;
+				case 2:
+					printf("TOCADO\n");
+					printf("Barco de 2\n");
+					*(bot1.tableroPropio+(ii*columnas)+jj) = -2;
+				break;
+				case 3:
+					printf("TOCADO\n");
+					printf("Barco de 3\n");
+					*(bot1.tableroPropio+(ii*columnas)+jj) = -3;
+				break;
+				default:
+					printf("Error: Unexpected\n");
+				break;
+			}
+			printf("\n");
+			contador++;
+		}
+		
+	}
+	printf("\n\nFINAL (%d turnos)\n", contador);
+	if( (contador%2) != 0 ){
+		printf("El ganador del partido es Bot1.\n\n");
+	}
+	else{
+		printf("El ganado del partido es Bot2.\n\n");
+	}
+	printf("Los tableros finalmente han quedado tal que así:\n");
+	printf("Tablero de Bot1:\n");
+	imprimirMatriz(bot1.tableroPropio, filas, columnas);
+	printf("Tablero de Bot2:\n\n");
+	imprimirMatriz(bot2.tableroPropio, filas, columnas);
 }
 
 int partidaFinalizada(int *tablero, int filas, int columnas){
@@ -823,7 +982,6 @@ void imprimirTableroRival(int *tablero,int filas,int columnas){
 		printf("%d\t", k);
 	}
 	printf("\n\n");
-	contador = 1;
 	for (i = 0; i < filas; i++){
 		printf("%d\t", contador);
 		for (j = 0; j < columnas; j++){
