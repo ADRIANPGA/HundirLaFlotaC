@@ -33,6 +33,9 @@ void colocarBarcos2(int *tablero, int filas, int columnas);
 void colocarBarcos3(int *tablero, int filas, int columnas);
 int partidaFinalizada(int *tablero, int filas, int columnas);
 void imprimirTableroRival(int *tablero,int filas,int columnas);
+void imprimirJugadaArchivo(int i, int j, int posDir, int contador, FILE *archivo);
+void imprimirTableroArchivo(int *tablero, int filas, int columnas, FILE *archivo);
+void juegoNuevoArchivo(FILE *archivo);
 
 // Main con las llamadas a las funciones necesarias para el juego
 int main(int argc, char const *argv[]){
@@ -48,21 +51,26 @@ int main(int argc, char const *argv[]){
 			return -1;
 		}
 	}
+	//Limpio el archivo antes de empezar a escribirlo
+	FILE *file;
+	file = fopen("Log.txt", "w");
+	fclose(file);
+	//Cambio la semilla de generación de numeros aleatorios
 	srand(time(NULL));
 	int filas = atoi(argv[1]), columnas = atoi(argv[2]);
 	int opcion;
-	//Recojo la opcion del menu y ejecuto el modo de juego escogido;
+	//Recojo la opcion del menu y ejecuto el modo de juego escogido junto a la opcion de volver a jugar
 	do{
 		desplegarCabecera();
 		opcion = menu();
 		switch(opcion){
 			case 1:
 				jugarSolo(filas, columnas);
-				opcion = volverAJugar();
+				opcion = volverAJugar(file);
 			break;
 			case 2:
 				jugarEntreMaquinas(filas, columnas);
-				opcion = volverAJugar();
+				opcion = volverAJugar(file);
 			break;
 			case 3:
 				opcion = -1;
@@ -103,7 +111,8 @@ int menu(){
 	return opcion;
 }
 
-int volverAJugar(){
+int volverAJugar(FILE *file){
+	file = fopen("Log.txt", "at");
 	int seleccionador;
 	do{
 		printf("\n¿Quiere volver a jugar?\n");
@@ -114,6 +123,7 @@ int volverAJugar(){
 			case 1:
 				printf("Volviendo a jugar.\n\n");
 				seleccionador = 0;
+				juegoNuevoArchivo(file);
 			break;
 			case 2:
 				seleccionador = -1;
@@ -153,6 +163,8 @@ void inicializarTablero(int *tablero, int filas, int columnas){
 }
 
 void jugarSolo(int filas, int columnas){
+	FILE *file;
+	file = fopen("log.txt", "at");
 	struct Jugador jugador, bot1;
 	int colocacion;
 	char *nombreJug=(char*)malloc(sizeof(char)*20);
@@ -160,6 +172,8 @@ void jugarSolo(int filas, int columnas){
 	scanf(" %s", nombreJug);
 	//Inicializo los nombres y reservo la memoria para tableros de cada una de las estructuras
 	printf("\nDara comienzo la batalla entre %s y Bot1.\n\n", nombreJug);
+	fprintf(file, "Comiezo del juego manual\n");
+	fprintf(file, "Partido entre %s y Bot1\n",nombreJug);
 	jugador.tableroPropio = (int*)malloc(sizeof(int)*filas*columnas);
 	bot1.tableroPropio = (int*)malloc(sizeof(int)*filas*columnas);
 	//Inicializo a cero todas las posiciones de los tableros
@@ -193,6 +207,10 @@ void jugarSolo(int filas, int columnas){
 	printf("Barcos de Bot1 generados automaticamente\n\n");
 	//Comienzo del juego en si
 	desplegarCabecera();
+	fprintf(file, "Tablero de %s:\n", nombreJug);
+	imprimirTableroArchivo(jugador.tableroPropio, filas, columnas, file);
+	fprintf(file, "Tablero de Bot1:\n");
+	imprimirTableroArchivo(bot1.tableroPropio, filas, columnas, file);
 	printf("Tableros generados, da comiezo el juego entre %s y Bot1.\n", nombreJug);
 	printf("Leyenda:\n");
 	printf("Las casillas de valor 0 simbolizaran agua.\n");
@@ -288,6 +306,8 @@ void jugarSolo(int filas, int columnas){
 					printf("Error: Unexpected\n");
 				break;
 			}
+			fprintf(file, "Turno de %s (Numero de %d)\n", nombreJug,contador);
+			imprimirJugadaArchivo(i, j, posDir, contador, file);
 		}
 		else{
 			printf("Turno para Bot1.\n");
@@ -331,15 +351,20 @@ void jugarSolo(int filas, int columnas){
 				break;
 			}
 			printf("\n");
+			fprintf(file, "Turno de %s (Numero de %d)\n", nombreJug,contador);
+			imprimirJugadaArchivo(ii, jj, posDir, contador, file);
 		}
 		contador++;
 	}
 	printf("\n\nFINAL (%d turnos)\n", contador);
+	fprintf(file, "Final del partido (%d turnos)", contador);
 	if( (contador%2) != 0 ){
 		printf("El ganador del partido es %s.\n\n", nombreJug);
+		fprintf(file, "Ha ganado %s\n", nombreJug);
 	}
 	else{
 		printf("El ganado del partido es Bot1.\n\n");
+		fprintf(file, "Ha ganado Bot1\n");
 	}
 }
 
@@ -825,6 +850,9 @@ void jugarEntreMaquinas(int filas, int columnas){
 	struct Jugador bot1, bot2;
 	bot2.tableroPropio = (int*)malloc(sizeof(int)*filas*columnas);
 	bot1.tableroPropio = (int*)malloc(sizeof(int)*filas*columnas);
+	FILE *file;
+	file = fopen("log.txt", "at");
+	fprintf(file, "Comienza el juego automatico\n");
 	//Inicializo a cero todas las posiciones de los tableros
 	inicializarTablero(bot1.tableroPropio, filas, columnas);
 	inicializarTablero(bot2.tableroPropio, filas, columnas);
@@ -842,6 +870,10 @@ void jugarEntreMaquinas(int filas, int columnas){
 	printf("Las casillas de valor 2 o -2 simbolizaran barcos de 2 posiciones intactos o disparados respectivamente.\n");
 	printf("Las casillas de valor 3 o -3 simbolizaran barcos de 3 posiciones intactos o disparados respectivamente.\n");
 	printf("Las casillas de valor ? simbolizaran posiciones del tablero con valor desconocido.\n");
+	fprintf(file,"Tablero del Bot1:\n");
+	imprimirTableroArchivo(bot1.tableroPropio, filas, columnas, file);
+	fprintf(file,"Tablero del Bot2:\n");
+	imprimirTableroArchivo(bot2.tableroPropio, filas, columnas, file);
 	//Da comienzo el bucle que decide la partida
 	int valido = 0, ii, jj, posDir = 0, contador = 0, avanceMax = 1, avance = 1, i, j, opcion;
 	while((partidaFinalizada(bot2.tableroPropio, filas, columnas) != 1) && (partidaFinalizada(bot1.tableroPropio, filas, columnas) != 1)){
@@ -888,6 +920,7 @@ void jugarEntreMaquinas(int filas, int columnas){
 					printf("Error: Unexpected\n");
 				break;
 			}
+			imprimirJugadaArchivo(ii, jj, posDir, contador, file);
 			printf("\n");
 			contador++;
 		}
@@ -934,17 +967,21 @@ void jugarEntreMaquinas(int filas, int columnas){
 					printf("Error: Unexpected\n");
 				break;
 			}
+			imprimirJugadaArchivo(ii, jj, posDir, contador, file);
 			printf("\n");
 			contador++;
 		}
 		
 	}
 	printf("\n\nFINAL (%d turnos)\n", contador);
+	fprintf(file, "Final (%d turnos)\n", contador);
 	if( (contador%2) != 0 ){
 		printf("El ganador del partido es Bot1.\n\n");
+		fprintf(file, "Ha ganado Bot1\n");
 	}
 	else{
 		printf("El ganado del partido es Bot2.\n\n");
+		fprintf(file, "Ha ganado Bot2\n");
 	}
 	printf("Los tableros finalmente han quedado tal que así:\n");
 	printf("Tablero de Bot1:\n");
@@ -995,4 +1032,62 @@ void imprimirTableroRival(int *tablero,int filas,int columnas){
 		printf("\n\n");
 		contador++;
 	}
+}
+
+void imprimirJugadaArchivo(int i, int j, int posDir, int contador, FILE *archivo){
+	switch(posDir){
+		case 0:
+			if (contador%2 == 0){
+				fprintf(archivo, "Tira el Jugador 1: (%d,%d) Agua\n\n", i+1, j+1);
+			}
+			else{
+				fprintf(archivo, "Tira el Jugador 2: (%d,%d) Agua\n\n", i+1, j+1);
+			}	
+		break;
+		case 1:
+			if (contador%2 == 0){
+				fprintf(archivo, "Tira el Jugador 1: (%d,%d) Tocado (barco de 1 posiciones)\n\n", i+1, j+1);
+			}
+			else{
+				fprintf(archivo, "Tira el Jugador 2: (%d,%d) Tocado (barco de 1 posiciones)\n\n", i+1, j+1);
+			}
+		break;
+		case 2:
+			if (contador%2 == 0){
+				fprintf(archivo, "Tira el Jugador 1: (%d,%d) Tocado (barco de 2 posiciones)\n\n", i+1, j+1);
+			}
+			else{
+				fprintf(archivo, "Tira el Jugador 2: (%d,%d) Tocado (barco de 2 posiciones)\n\n", i+1, j+1);
+			}
+		break;
+		case 3:
+			if (contador%2 == 0){
+				fprintf(archivo, "Tira el Jugador 1: (%d,%d) Tocado (barco de 3 posiciones)\n\n", i+1, j+1);
+			}
+			else{
+				fprintf(archivo, "Tira el Jugador 2: (%d,%d) Tocado (barco de 3 posiciones)\n\n", i+1, j+1);
+			}
+		break;
+	}
+	fprintf(archivo,"\n\n");
+}
+
+void imprimirTableroArchivo(int *tablero, int filas, int columnas, FILE *archivo){
+	int i, j;
+	for (i = 0; i < filas ; i++){
+		for (j = 0; j < columnas; j++){
+			fprintf(archivo,"%d\t",*(tablero+(i*columnas)+j));
+		}
+		fprintf(archivo,"\n");
+	}
+	fprintf(archivo,"\n");
+}
+
+void juegoNuevoArchivo(FILE *archivo){
+	int i;
+	fprintf(archivo, "---------------------------------------------------------\n");
+	for(i = 0; i < 8; i++){
+		fprintf(archivo, "\n");
+	}
+	fprintf(archivo, "---------------------------------------------------------\n\n");
 }
