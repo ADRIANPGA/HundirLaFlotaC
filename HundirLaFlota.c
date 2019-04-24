@@ -53,7 +53,7 @@ int main(int argc, char const *argv[]){
 	}
 	//Limpio el archivo antes de empezar a escribirlo
 	FILE *file;
-	file = fopen("Log.txt", "w");
+	file = fopen("log.txt", "w");
 	fclose(file);
 	//Cambio la semilla de generación de numeros aleatorios
 	srand(time(NULL));
@@ -112,7 +112,7 @@ int menu(){
 }
 
 int volverAJugar(FILE *file){
-	file = fopen("Log.txt", "at");
+	file = fopen("log.txt", "at");
 	int seleccionador;
 	do{
 		printf("\n¿Quiere volver a jugar?\n");
@@ -366,6 +366,7 @@ void jugarSolo(int filas, int columnas){
 		printf("El ganado del partido es Bot1.\n\n");
 		fprintf(file, "Ha ganado Bot1\n");
 	}
+	fclose(file);
 }
 
 void colocarBarcosManual(int *tablero, int filas, int columnas){
@@ -988,6 +989,7 @@ void jugarEntreMaquinas(int filas, int columnas){
 	imprimirMatriz(bot1.tableroPropio, filas, columnas);
 	printf("Tablero de Bot2:\n\n");
 	imprimirMatriz(bot2.tableroPropio, filas, columnas);
+	fclose(file);
 }
 
 int partidaFinalizada(int *tablero, int filas, int columnas){
